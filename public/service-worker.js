@@ -3,7 +3,10 @@ const FILES_TO_CACHE = [
     "/icons/icon-192x192.png",
     "/icons/icon-512x512.png",
     "/index.html",
-    "/index.js"
+    "/index.js",
+    "/styles.css",
+    "/db.js",
+    "https://cdn.jsdelivr.net/npm/chart.js@2.8.0"
   ];
   
 const CACHE_NAME = "static-cache-v2";
@@ -19,6 +22,24 @@ evt.waitUntil(
 
 self.skipWaiting();
   });
+
+  self.addEventListener("activate", function(evt) {
+    evt.waitUntil(
+      caches.keys().then(keyList => {
+        return Promise.all(
+          keyList.map(key => {
+            if (key !== CACHE_NAME && key !== DATA_CACHE_NAME) {
+              console.log("Removing old cache data", key);
+              return caches.delete(key);
+            }
+          })
+        );
+      })
+    );
+  
+    self.clients.claim();
+  });
+  
 
 self.addEventListener("fetch", function(evt) {
 if (evt.request.url.includes("/api/")) {
